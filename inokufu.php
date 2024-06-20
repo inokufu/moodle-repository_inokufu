@@ -23,18 +23,16 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
  */
 
-define('INOKUFU_GATEWAY_URL', 'https://api.gateway.inokufu.com');
-define('INOKUFU_LO_ENDPOINT', INOKUFU_GATEWAY_URL . '/learningobject/v3/');
+require_once ($CFG->libdir . '/externallib.php');
 
-class inokufu {
-
+class inokufu
+{
     private $default_lang = 'fr';
     private $supported_langs;
     private $used_lang;
-    private $api_key;
 
-    public function __construct($api_key, $used_lang) {
-        $this->api_key = $api_key;
+    public function __construct($used_lang)
+    {
         $this->supported_langs = array($this->default_lang, 'en');
 
         if (in_array($used_lang, $this->supported_langs, true)) {
@@ -44,51 +42,36 @@ class inokufu {
         }
     }
 
-    /** Utils */
-
     /**
-     * API Call to a given endpoint
+     * Call Inokufu Services and retrieve tha needed API LO data
      *
-     * @param string $base_endpoint Endpoint, without query arguments
-     * @param string $get_args Query arguments, starting with a '?'
-     * @param array $headers Array of headers
-     * @return array Results found
+     * @param string $func_name External function's name
+     * @param array $params Parameters for the external function
+     * @return array Retrieved data
      */
-    private function api_call($base_endpoint, $get_args = '', $headers = array()) {
-        $curl = curl_init();
-        $headers[] = 'x-api-key: ' . $this->api_key;
-        curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($curl, CURLOPT_URL, $base_endpoint . $get_args);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        $json = curl_exec($curl);
-        $httpcode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-        curl_close($curl);
+    private function call_external_api($func_name, $params = null)
+    {
+        $params = $params ? $params : array();
+        $result = external_api::call_external_function(
+            $func_name,
+            $params,
+            null    // To use the current context
+        );
 
-        if ($httpcode == 200 && isset($json) && !empty($json)) {
-            $results = json_decode($json);
-            return $results;
+        if (isset($result['error']) && !$result['error'] && isset($result['data'])) {
+            // No errors, return the data
+            return $result['data'];
+
+        } else if (isset($result['exception'])) {
+            // Moodle error
+            $exception_details = $result['exception'];
+            $exception_msg = $exception_details->message . ' - ';
+            $exception_msg .= $exception_details->debuginfo . ' - ';
+            throw new Exception($exception_msg);
         } else {
-            throw new Exception('Inokufu API LO error', $httpcode);
+            // Unsupported error
+            throw new Exception('Unsupported error, please contact Inokufu\'s support.' . json_encode($result));
         }
-    }
-
-    /**
-     * Format query args based on an associative array (key/value)
-     *
-     * @param array $args
-     * @return string Formatted query args
-     */
-    public function format_get_args($args) {
-        $formatted_args = array();
-        if (!empty($args)) {
-            foreach ($args as $key => $value) {
-                if ($value != '') {
-                    array_push($formatted_args, $key . '=' . $value);
-                }
-            }
-        }
-        $ret = '?' . join('&', $formatted_args);
-        return $ret;
     }
 
     /**
@@ -98,12 +81,15 @@ class inokufu {
      * @param string $dotted_path Dotted path
      * @return mixed The value obtained if found, else null
      */
-    private function get_dotted_property($object, $dotted_path) {
+    private function get_dotted_property($object, $dotted_path)
+    {
         $parts = explode('.', $dotted_path);
         $value = $object;
         foreach ($parts as $part) {
             if (is_object($value) && property_exists($value, $part)) {
                 $value = $value->{$part};
+            } else if (is_array($value) && array_key_exists($part, $value)) {
+                $value = $value[$part];
             } else {
                 return null;
             }
@@ -119,7 +105,8 @@ class inokufu {
      * @param string $dotted_label_key Dotted key to the label of the option
      * @return array Array representation of the 'option' created
      */
-    private function add_select_item($value, $value_key, $dotted_label_key) {
+    private function add_select_item($value, $value_key, $dotted_label_key)
+    {
         return array(
             'value' => $this->get_dotted_property($value, $value_key),
             'label' => $this->get_dotted_property($value, $dotted_label_key),
@@ -134,8 +121,11 @@ class inokufu {
      * @param string $dotted_label_key Dotted key to the label of the option
      * @return array Array representation of the 'select' created
      */
-    public function format_json_for_list_display($json, $value_key, $dotted_label_key) {
+    public function format_json_for_list_display($json, $value_key, $dotted_label_key)
+    {
         $ret = array();
+        $json = isset($json) && !empty($json) ? $json : array();
+
         $ret[] = $this->add_select_item('', '', '');
         foreach ($json as $key => $value) {
             $ret[] = $this->add_select_item($value, $value_key, $dotted_label_key);
@@ -143,29 +133,30 @@ class inokufu {
         return $ret;
     }
 
-    /** Calls */
-
     /**
      * Format LO type list as a 'select'
      */
-    public function get_types_formatted() {
-        $json = $this->api_call(INOKUFU_LO_ENDPOINT . 'type');
+    public function get_types_formatted()
+    {
+        $json = self::call_external_api('local_inokufu_get_type');
         return $this->format_json_for_list_display($json, 'id_type', 'name.' . $this->used_lang);
     }
 
     /**
      * Format LO provider list as a 'select'
      */
-    public function get_providers_formatted() {
-        $json = $this->api_call(INOKUFU_LO_ENDPOINT . 'provider');
+    public function get_providers_formatted()
+    {
+        $json = self::call_external_api('local_inokufu_get_provider');
         return $this->format_json_for_list_display($json, 'id_provider', 'name');
     }
 
     /**
      * Format LO lang list as a 'select'
      */
-    public function get_langs_formatted() {
-        $json = $this->api_call(INOKUFU_LO_ENDPOINT . 'lang');
+    public function get_langs_formatted()
+    {
+        $json = self::call_external_api('local_inokufu_get_lang');
         return $this->format_json_for_list_display($json, 'id_lang', 'name.' . $this->used_lang);
     }
 
@@ -183,10 +174,15 @@ class inokufu {
      * @return array Array of LOs found
      */
     public function get_learning_objects(
-        $page, $query, $lang, $provider, $type, $is_chargeable
+        $page,
+        $query,
+        $lang,
+        $provider,
+        $type,
+        $is_chargeable
     ) {
         $query = urlencode($query); // special char support
-        $query_args_raw = array(
+        $query_args = array(
             'query' => $query,
             'lang' => $lang,
             'provider' => $provider,
@@ -196,28 +192,28 @@ class inokufu {
         );
         // If chargeable content not included, send 'free' = true
         if (!$is_chargeable) {
-            $query_args_raw['free'] = true;
+            $query_args['free'] = true;
         }
-        
-        $results = $this->api_call(INOKUFU_LO_ENDPOINT . 'search' , $this->format_get_args($query_args_raw));
-        
+
+        // Get data
+        $results = self::call_external_api('local_inokufu_get_search', array('params' => $query_args));
+
         $list = [];
         $timestamp = time();
         foreach ($results as $key => $value) {
-            $preview_content = INOKUFU_LO_ENDPOINT . 'lo/' . $value->id . '/preview';
+            $details_url = self::call_external_api('local_inokufu_get_host') . 'lo/' . $value['id'];
             $list[] = array(
-                'title' => $value->title,
-                'description' => $value->description,
-                'thumbnail' => $value->picture->full_width,
+                'title' => $value['title'],
+                'description' => $value['description'],
+                'thumbnail' => $value['picture']['full_width'],
                 'thumbnail_width' => 150,
                 'thumbnail_height' => 100,
-                'source' => $preview_content,
-                'url' => $preview_content,
+                'source' => $details_url,
+                'url' => $details_url,
                 'date' => $timestamp,   // 'datemodified' & 'datecreated' have automatically the same value
-                'author' => $value->provider,
+                'author' => $value['provider'],
             );
         }
         return $list;
     }
-
 }

@@ -36,8 +36,6 @@ $string[CONST_TYPE] = 'Type :';
 $string[CONST_PROVIDER] = 'Fournisseur :';
 $string[CONST_LANG] = 'Langue :';
 $string[CONST_NOT_FREE] = 'Inclure du contenu payant :';
-$string[CONST_API_KEY] = 'Clé API';
-$string[CONST_KEY_INFORMATION] = 'Obtenez votre <a href="https://gateway.inokufu.com/">clé API ici</a>.';
 
 $string[CONST_OR] = 'OU';
 $string[CONST_DEFAULT_LANG] = '- Langue par défaut -';

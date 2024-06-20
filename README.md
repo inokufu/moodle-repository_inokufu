@@ -3,10 +3,14 @@ Inokufu Search - Repository Plugin for the Moodle™ platform
 
 The Inokufu Search - Repository Plugin for the Moodle™ platform is part of the set of plugins required to integrate Inokufu Search into your Moodle™ platform. 
 This set also includes:
-- the [Inokufu Search - Atto plugin for the Moodle™ platform](https://github.com/inokufu/moodle-atto_inokufu), 
-- the [Inokufu Search - TinyMCE plugin for the Moodle™ platform](https://github.com/inokufu/moodle-tinymce_inokufu). 
+- [Inokufu Search - Local Services plugin pour la plateforme Moodle™](https://github.com/inokufu/moodle-local_inokufu), 
+- [Inokufu Search - Atto plugin for the Moodle™ platform](https://github.com/inokufu/moodle-atto_inokufu), 
+- [Inokufu Search - TinyMCE plugin for the Moodle™ platform](https://github.com/inokufu/moodle-tinymce_inokufu). 
 
+This plugin enables users to access Inokufu Search technology, and add Learning Objects to courses of your Moodle™ platform.
 This documentation will guide you through the installation and usage of the plugin.
+
+**Note:** This Moodle Plugin is only useful when combined with our `Inokufu Search - Moodle Local Services Plugin`. Please be sure to have it installed and configured before installing this plugin.
 
 Please find a French version of this documentation [here](./README.fr.md).
 
@@ -31,10 +35,8 @@ Please find a French version of this documentation [here](./README.fr.md).
 1. After successful installation, navigate to `Site administration > Plugins > Repositories > Manage repositories` to configure the plugin settings.
 2. Activate the `Inokufu Search` repository plugin by switching it to `Enabled and visible`.
 3. Navigate to the plugin settings, by clicking on `Settings` (next to `Inokufu Search` and `Enabled and visible`), or by navigating to `Site administration > Plugins > Repositories > Inokufu Search`.
-4. Enter the Plugin Name (Optional), and your API Key.
+4. Enter the Plugin Name (Optional).
 5. Save changes, and start using the repository plugin.
-
-**Note:** An API Key is required to see this plugin in Moodle Repositories, and use it in the Moodle File Picker. To obtain an API Key, please refer to the [Inokufu APIs Gateway](https://gateway.inokufu.com/) section or contact [Inokufu Support](https://support.inokufu.com/).
 
 ## Troubleshooting
 If you encounter any issues with the plugin, please check the following:

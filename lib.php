@@ -25,8 +25,8 @@
  */
 
 require_once($CFG->dirroot . '/repository/lib.php');
-require_once(__DIR__ . '/../../config.php');
 
+require_once(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/inokufu.php');
 require_once(__DIR__ . '/constants.php');
 
@@ -40,13 +40,6 @@ require_once(__DIR__ . '/constants.php');
  */
 
 class repository_inokufu extends repository {
-
-    /**
-     * ID for using the Inokufu Search API.
-     * @var mixed
-     */
-    private $api_key;
-
     /**
      * Inokufu client
      * @var inokufu
@@ -63,41 +56,7 @@ class repository_inokufu extends repository {
         parent::__construct($repositoryid, $context, $options);
         global $USER;
 
-        $this->api_key = $this->get_option(CONST_API_KEY);
-        $this->client = new inokufu($this->api_key, $USER->lang);
-
-        // Without an API Key, don't show this repo to users as its useless without it.
-        if (empty($this->api_key)) {
-            $this->disabled = true;
-        }
-    }
-
-    /**
-     * Get api_key from config table.
-     *
-     * @param string $config
-     * @return mixed
-     */
-    public function get_option($config = '') {
-        if ($config === CONST_API_KEY) {
-            return trim(get_config('inokufu', CONST_API_KEY));
-        } else {
-            $options[CONST_API_KEY] = trim(get_config('inokufu', CONST_API_KEY));
-        }
-        return parent::get_option($config);
-    }
-
-    /**
-     * Save api_key in config table.
-     * @param array $options
-     * @return boolean
-     */
-    public function set_option($options = array()) {
-        if (!empty($options[CONST_API_KEY])) {
-            set_config(CONST_API_KEY, trim($options[CONST_API_KEY]), 'inokufu');
-        }
-        unset($options[CONST_API_KEY]);
-        return parent::set_option($options);
+        $this->client = new inokufu($USER->lang);
     }
 
     /**
@@ -133,63 +92,24 @@ class repository_inokufu extends repository {
     }
 
     /**
-     * Add plugin settings input to Moodle form.
-     * @param object $mform
-     * @param string $classname
-     */
-    public static function type_config_form($mform, $classname = 'repository') {
-        parent::type_config_form($mform, $classname);
-
-        $api_key = get_config('inokufu', CONST_API_KEY);
-
-        if (empty($api_key)) {
-            $api_key = '';
-        }
-
-        $mform->addElement('password', CONST_API_KEY, get_string(CONST_API_KEY, REPO_NAME), array('value' => $api_key, 'size' => '40'));
-        $mform->setType(CONST_API_KEY, PARAM_RAW_TRIMMED);
-        $mform->addRule(CONST_API_KEY, get_string('required'), 'required', null, 'client');
-        $mform->setDefault(CONST_API_KEY, 'default');
-
-        $mform->addElement('static', null, '',  get_string(CONST_KEY_INFORMATION, REPO_NAME));
-    }
-
-    /**
      * Search form
      * @return array
      * @throws coding_exception
      */
     public function print_login() {
         try {
-            $cache = cache::make(REPO_NAME, 'api_lo_cache');
+            // Types
+            $options_types = $this->client->get_types_formatted();
+            $options_types[0]['label'] = get_string(CONST_ALL, REPO_NAME);
 
-            $cached_data = $cache->get(CONST_TYPE);
-            if ($cached_data !== false) {
-                $options_types = json_decode($cached_data);
-            } else {
-                $options_types = $this->client->get_types_formatted();
-                $options_types[0]['label'] = get_string(CONST_ALL, REPO_NAME);
-                $cache->set(CONST_TYPE, json_encode($options_types));
-            }
+            // Providers
+            $options_providers = $this->client->get_providers_formatted();
+            $options_providers[0]['label'] = get_string(CONST_ALL, REPO_NAME);
 
-            $cached_data = $cache->get(CONST_PROVIDER);
-            if ($cached_data !== false) {
-                $options_providers = json_decode($cached_data);
-            } else {
-                $options_providers = $this->client->get_providers_formatted();
-                $options_providers[0]['label'] = get_string(CONST_ALL, REPO_NAME);
-                $cache->set(CONST_PROVIDER, json_encode($options_providers));
-            }
-
-            $cached_data = $cache->get(CONST_LANG);
-            if ($cached_data !== false) {
-                $options_langs = json_decode($cached_data);
-            } else {
-                $options_langs = $this->client->get_langs_formatted();
-                $options_langs[0]['label'] = get_string(CONST_DEFAULT_LANG, REPO_NAME);
-                $cache->set(CONST_LANG, json_encode($options_langs));
-            }
-
+            // Langs
+            $options_langs = $this->client->get_langs_formatted();
+            $options_langs[0]['label'] = get_string(CONST_DEFAULT_LANG, REPO_NAME);
+            
         } catch (Exception $e) {
             $this->print_api_lo_error_message($e);
         }
@@ -318,14 +238,6 @@ class repository_inokufu extends repository {
     }
 
     /**
-     * Names of the plugin settings
-     * @return array
-     */
-    public static function get_type_option_names() {
-        return array(CONST_API_KEY, PLUGIN_NAME);
-    }
-
-    /**
      * Bypass first 'get_listing' screen with no content displayed
      * @return boolean
      */
@@ -367,5 +279,4 @@ class repository_inokufu extends repository {
     public function contains_private_data() {
         return false;
     }
-
 }

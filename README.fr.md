@@ -1,8 +1,16 @@
-Inokufu Search - Plugin Repository Moodle
+Inokufu Search - Repository Plugin pour la plateforme Moodle™
 =================================
 
-Le plugin Inokufu Search - Plugin Dépôt Moodle fait partie de l'ensemble des plugins Moodle Inokufu Search, qui inclut également le plugin Inokufu Search - Plugin Atto Moodle. Ce plugin Dépôt Moodle vous permet d'accéder à la technologie Inokufu Search et d'ajouter des Objets d'Apprentissage à vos formations sur Moodle.
+Inokufu Search - Repository Plugin pour la plateforme Moodle™ fait partie de l'ensemble des plugins permettant d'intégrer Inokufu Search dans votre plateforme Moodle™.
+Cet ensemble inclut également :
+- [Inokufu Search - Local Services plugin pour la plateforme Moodle™](https://github.com/inokufu/moodle-local_inokufu), 
+- [Inokufu Search - TinyMCE plugin pour la plateforme Moodle™](https://github.com/inokufu/moodle-tinymce_inokufu). 
+- [Inokufu Search - Atto Plugin pour la plateforme Moodle™](https://github.com/inokufu/moodle-atto_inokufu). 
+
+Ce plugin permet aux utilisateurs d'accéder à la technologie Inokufu Search et d'ajouter des Objets d'Apprentissage aux formations sur votre plateforme Moodle™.
 Ce document vous guidera à travers l'installation et l'utilisation du plugin.
+
+**Note :** Ce plugin Moodle n'est utile que lorsqu'il est combiné avec notre plugin `Inokufu Search - Plugin Services Local Moodle`. Assurez-vous de l'avoir installé et configuré avant d'installer ce plugin.
 
 ## Installation
 
@@ -25,10 +33,8 @@ Ce document vous guidera à travers l'installation et l'utilisation du plugin.
 1. Après une installation réussie, accédez à `Administration du site > Plugins > Dépôts > Gérer les dépôts` pour configurer les paramètres du plugin.
 2. Activez le plugin de dépôt `Inokufu Search` en le basculant sur `Activé et visible`.
 3. Accédez aux paramètres du plugin en cliquant sur `Paramètres` (à côté de `Inokufu Search` et `Activé et visible`), ou en accédant à `Administration du site > Plugins > Dépôts > Inokufu Search`.
-4. Entrez le Nom du Plugin (facultatif) et votre Clé API.
+4. Entrez le Nom du Plugin (facultatif).
 5. Enregistrez les modifications et commencez à utiliser le plugin de dépôt.
-
-**Note :** Une Clé API est requise pour voir ce plugin dans les Dépôts Moodle et l'utiliser dans le Sélecteur de Fichiers Moodle. Pour obtenir une Clé API, veuillez vous référer à la section [Inokufu APIs Gateway](https://gateway.inokufu.com/) ou contacter le [Support Inokufu](https://support.inokufu.com/).
 
 ## Résolution des problèmes
 Si vous rencontrez des problèmes avec le plugin, veuillez vérifier les points suivants :

@@ -11,8 +11,6 @@ define('CONST_TYPE', 'type');
 define('CONST_PROVIDER', 'provider');
 define('CONST_LANG', 'language');
 define('CONST_NOT_FREE', 'free');
-define('CONST_API_KEY', 'api_key');
-define('CONST_KEY_INFORMATION', 'keyinformation');
 
 define('CONST_OR', 'key_or');
 define('CONST_DEFAULT_LANG', 'key_default');
